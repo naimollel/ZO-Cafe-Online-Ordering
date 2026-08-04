@@ -40,7 +40,7 @@
         font-family: var(--sans);
       }
 
-      button, input { font: inherit; }
+      button, input, select { font: inherit; }
       button { cursor: pointer; }
 
       .hero {
@@ -51,37 +51,16 @@
       }
 
       .brand {
-        display: inline-flex;
-        flex-direction: column;
-        align-items: center;
+        display: inline-block;
         margin-bottom: 50px;
-        color: #000;
-        font-family: var(--serif);
       }
 
-      .brand-monogram {
-        display: grid;
-        gap: 4px;
-      }
-
-      .brand-letter {
-        display: grid;
-        width: 80px;
-        height: 80px;
-        place-items: center;
-        color: #fff;
-        background: #000;
-        font-size: 5rem;
-        font-weight: 400;
-        line-height: 0.8;
-      }
-
-      .brand-name {
-        margin-top: 6px;
-        font-size: 2rem;
-        font-weight: 400;
-        letter-spacing: -0.06em;
-        line-height: 1;
+      .brand-logo {
+        display: block;
+        width: 120px;
+        height: 240px;
+        object-fit: cover;
+        object-position: center;
       }
 
       h1, h2 { font-family: var(--serif); }
@@ -281,7 +260,7 @@
       }
       .dialog-content p { margin: 0 0 20px; color: var(--muted); font-size: 0.88rem; line-height: 1.5; }
       label { display: block; margin-bottom: 7px; font-size: 0.8rem; font-weight: 700; }
-      input {
+      input, select {
         width: 100%;
         padding: 13px 14px;
         border: 1px solid #cdbb9f;
@@ -290,6 +269,8 @@
         color: var(--ink);
         background: #fffdf8;
       }
+      .form-field { margin-top: 15px; }
+      .form-field:first-of-type { margin-top: 0; }
       .dialog-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 18px; }
       .dialog-actions button { padding: 10px 14px; border-radius: 8px; font-size: 0.8rem; font-weight: 700; }
       .cancel { border: 0; color: var(--muted); background: transparent; }
@@ -298,8 +279,7 @@
       @media (max-width: 560px) {
         .hero { padding: 26px 22px 48px; }
         .brand { margin-bottom: 35px; }
-        .brand-letter { width: 58px; height: 58px; font-size: 3.6rem; }
-        .brand-name { font-size: 1.55rem; }
+        .brand-logo { width: 90px; height: 180px; }
         .intro { font-size: 0.88rem; }
         main { width: min(100% - 20px, 1130px); }
         .menu-section { margin-bottom: 16px; padding: 20px 18px 8px; border-radius: 17px; }
@@ -316,11 +296,7 @@
   <body>
     <header class="hero">
       <div class="brand" aria-label="Zo Café">
-        <div class="brand-monogram" aria-hidden="true">
-          <span class="brand-letter">Z</span>
-          <span class="brand-letter">O</span>
-        </div>
-        <span class="brand-name">Café</span>
+        <img class="brand-logo" src="tuna-logo.png" alt="Zo Café" />
       </div>
       <h1>Pick your plates,<em>we'll take it from there.</em></h1>
       <p class="intro">
@@ -343,9 +319,27 @@
     <dialog class="location-dialog" id="location-dialog" aria-labelledby="location-heading">
       <form class="dialog-content" id="location-form">
         <h3 id="location-heading">Where should we deliver?</h3>
-        <p>Add your location and WhatsApp will open with your order ready to send.</p>
-        <label for="location">Delivery location</label>
-        <input id="location" name="location" autocomplete="street-address" placeholder="e.g. Masaki, Sea Cliff Village" required />
+        <p>Add your details and WhatsApp will open with your order ready to send.</p>
+        <div class="form-field">
+          <label for="location">Delivery location</label>
+          <select id="location" name="location" required>
+            <option value="" selected disabled>Select a delivery location</option>
+            <option value="ZO Seacliff">ZO Seacliff</option>
+            <option value="ZO Slipway">ZO Slipway</option>
+          </select>
+        </div>
+        <div class="form-field">
+          <label for="person-name">Person's name</label>
+          <input id="person-name" name="person-name" autocomplete="name" placeholder="e.g. Amina Hassan" required />
+        </div>
+        <div class="form-field">
+          <label for="office-number">Office number</label>
+          <input id="office-number" name="office-number" autocomplete="tel" inputmode="tel" placeholder="e.g. +255 712 345 678" required />
+        </div>
+        <div class="form-field">
+          <label for="company-name">Company name</label>
+          <input id="company-name" name="company-name" autocomplete="organization" placeholder="e.g. Zo Café" required />
+        </div>
         <div class="dialog-actions">
           <button class="cancel" id="cancel-location" type="button">Cancel</button>
           <button class="confirm" type="submit">Continue to WhatsApp</button>
@@ -390,6 +384,9 @@
       const locationDialog = document.querySelector("#location-dialog");
       const locationForm = document.querySelector("#location-form");
       const locationInput = document.querySelector("#location");
+      const personNameInput = document.querySelector("#person-name");
+      const officeNumberInput = document.querySelector("#office-number");
+      const companyNameInput = document.querySelector("#company-name");
       const whatsappNumber = "255657051162";
 
       const escapeHtml = (value) => value.replace(/[&<>'"]/g, (character) => ({
@@ -466,7 +463,7 @@
       locationForm.addEventListener("submit", (event) => {
         event.preventDefault();
         const orderLines = selectedItems().map(([name, quantity]) => `- ${quantity}× ${name}`).join("\n");
-        const message = `Hi! I'd like to order:\n${orderLines}\n\nPlease deliver my order at ${locationInput.value.trim()}\n\nThank you!`;
+        const message = `Hi! I'd like to order:\n${orderLines}\n\nPlease deliver my order at ${locationInput.value}\nPerson: ${personNameInput.value.trim()}\nOffice number: ${officeNumberInput.value.trim()}\nCompany: ${companyNameInput.value.trim()}\n\nThank you!`;
         window.open(`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`, "_blank", "noopener,noreferrer");
         locationDialog.close();
       });
