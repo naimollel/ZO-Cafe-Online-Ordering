@@ -154,6 +154,13 @@
         line-height: 1.35;
       }
 
+      .item-price {
+        margin: 6px 0 0;
+        color: var(--accent);
+        font-size: 0.81rem;
+        font-weight: 700;
+      }
+
       .quantity-control {
         display: flex;
         align-items: center;
@@ -340,6 +347,10 @@
           <label for="company-name">Company name</label>
           <input id="company-name" name="company-name" autocomplete="organization" placeholder="e.g. Zo Café" required />
         </div>
+        <div class="form-field">
+          <label for="promo-code">Promo code <span aria-hidden="true">(optional)</span></label>
+          <input id="promo-code" name="promo-code" autocomplete="off" placeholder="Enter promo code" />
+        </div>
         <div class="dialog-actions">
           <button class="cancel" id="cancel-location" type="button">Cancel</button>
           <button class="confirm" type="submit">Continue to WhatsApp</button>
@@ -353,16 +364,16 @@
           title: "Salads (zo cafe)",
           number: "01",
           items: [
-            ["Chicken Tikka Salad", "char-grilled tikka, greens, cooling yoghurt"],
-            ["Chicken Caesar Salad", "crisp romaine, shaved parmesan, house dressing"],
+            ["Chicken Tikka Salad", "char-grilled tikka, greens, cooling yoghurt", "Tsh 10500"],
+            ["Chicken Caesar Salad", "crisp romaine, shaved parmesan, house dressing", "Tsh 10500"],
           ],
         },
         {
           title: "Sandwich (zo cafe)",
           number: "02",
           items: [
-            ["Cheese and Tomato Cold Sandwich", "layered cold, simple and honest"],
-            ["Chicken Tikka Cold Sandwich", "tikka chicken, cold-pressed, on soft bread"],
+            ["Cheese and Tomato Cold Sandwich", "layered cold, simple and honest", "Tsh 9500"],
+            ["Chicken Tikka Cold Sandwich", "tikka chicken, cold-pressed, on soft bread", "Tsh 11500"],
           ],
         },
         {
@@ -387,7 +398,9 @@
       const personNameInput = document.querySelector("#person-name");
       const officeNumberInput = document.querySelector("#office-number");
       const companyNameInput = document.querySelector("#company-name");
+      const promoCodeInput = document.querySelector("#promo-code");
       const whatsappNumber = "255657051162";
+      const itemPrices = new Map(menu.flatMap((section) => section.items.map(([name, , price]) => [name, price])));
 
       const escapeHtml = (value) => value.replace(/[&<>'"]/g, (character) => ({
         "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#039;", '"': "&quot;"
@@ -399,11 +412,12 @@
             <h2 id="section-${section.number}">${section.title}</h2>
             <span class="section-number">${section.number}</span>
           </div>
-          ${section.items.map(([name, description]) => `
+          ${section.items.map(([name, description, price]) => `
             <article class="menu-item" data-item="${escapeHtml(name)}" data-quantity="0">
               <div>
                 <h3 class="item-name">${name}</h3>
                 <p class="item-description">${description}</p>
+                ${price ? `<p class="item-price">${price}</p>` : ""}
               </div>
               <div class="quantity-control" aria-label="Quantity for ${escapeHtml(name)}">
                 <button class="quantity-button" type="button" data-action="decrease" aria-label="Remove one ${escapeHtml(name)}">−</button>
@@ -462,8 +476,13 @@
 
       locationForm.addEventListener("submit", (event) => {
         event.preventDefault();
-        const orderLines = selectedItems().map(([name, quantity]) => `- ${quantity}× ${name}`).join("\n");
-        const message = `Hi! I'd like to order:\n${orderLines}\n\nPlease deliver my order at ${locationInput.value}\nPerson: ${personNameInput.value.trim()}\nOffice number: ${officeNumberInput.value.trim()}\nCompany: ${companyNameInput.value.trim()}\n\nThank you!`;
+        const orderLines = selectedItems().map(([name, quantity]) => {
+          const price = itemPrices.get(name);
+          return `- ${quantity}× ${name}${price ? ` — ${price}` : ""}`;
+        }).join("\n");
+        const promoCode = promoCodeInput.value.trim();
+        const promoLine = promoCode ? `\nPromo code: ${promoCode}` : "";
+        const message = `Hi! I'd like to order:\n${orderLines}\n\nPlease deliver my order at ${locationInput.value}\nPerson: ${personNameInput.value.trim()}\nOffice number: ${officeNumberInput.value.trim()}\nCompany: ${companyNameInput.value.trim()}${promoLine}\n\nThank you!`;
         window.open(`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`, "_blank", "noopener,noreferrer");
         locationDialog.close();
       });
