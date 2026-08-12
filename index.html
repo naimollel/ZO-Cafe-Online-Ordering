@@ -182,6 +182,15 @@
         font-weight: 700;
       }
 
+      .menu-note {
+        margin: -13px 0 0;
+        color: var(--muted);
+        font-family: var(--serif);
+        font-size: 1rem;
+        font-style: italic;
+        text-align: center;
+      }
+
       .quantity-control {
         display: flex;
         align-items: center;
@@ -333,7 +342,7 @@
       </div>
       <h1>Pick your plates,<em>we'll take it from there.</em></h1>
       <p class="intro">
-        Tap the items you want, adjust the quantities, then press Order. Your selected items will open in WhatsApp as a ready-to-send message. Place your order before 11:00 AM for same-day preparation.
+        Tap the items you want, adjust the quantities, then press Order. Your selected items will open in WhatsApp as a ready-to-send message. Place your order before 10:00 AM for same-day preparation.
       </p>
     </header>
 
@@ -357,13 +366,13 @@
           <label for="location">Delivery location</label>
           <select id="location" name="location" required>
             <option value="" selected disabled>Select a location</option>
-            <option value="Seacliff">Seacliff</option>
-            <option value="Masaki">Masaki</option>
+            <option value="ZO Slipway">ZO Slipway</option>
+            <option value="ZO Seacliff">ZO Seacliff</option>
           </select>
         </div>
         <div class="form-field">
-          <label for="company">Company</label>
-          <input id="company" name="company" autocomplete="organization" placeholder="e.g. Zo Spaces" required />
+          <label for="company">Company name</label>
+          <input id="company" name="company" autocomplete="organization" placeholder="e.g. Dentsu" required />
         </div>
         <div class="form-field">
           <label for="office-number">Office number</label>
@@ -389,11 +398,16 @@
             ["Volcano Roll", "baked and spiced, served warm on top", 20000],
             ["Avo Mango Tuna Sushi", "avocado, mango, fresh-cut tuna", 20000],
             ["Avo Tuna Sushi", "avocado and tuna, kept clean and classic", 20000],
+            ["Classic Roll", "tuna & avo roll, garnished with sesame seeds", 20000],
+            ["Nourish Roll", "tuna, avo, carrot & cucumber roll, topped with avo and garnished with sesame seeds", 20000],
+            ["Tamu Roll", "tuna & avo roll, drizzled with mayo", 20000],
+            ["Maki Roll", "tuna & avo roll, nori outside", 20000],
           ],
         },
       ];
 
       const quantities = new Map();
+      const prices = new Map(menu.flatMap(({ items }) => items.map(([name, , price]) => [name, price])));
       const menuElement = document.querySelector("#menu");
       const checkoutTitle = document.querySelector("#checkout-title");
       const checkoutPreview = document.querySelector("#checkout-preview");
@@ -431,7 +445,7 @@
             </article>
           `).join("")}
         </section>
-      `).join("");
+      `).join("") + `<p class="menu-note">(10 pcs and all freshly made)</p>`;
 
       function selectedItems() {
         return [...quantities.entries()].filter(([, quantity]) => quantity > 0);
@@ -480,10 +494,10 @@
 
       locationForm.addEventListener("submit", (event) => {
         event.preventDefault();
-        const orderLines = selectedItems().map(([name, quantity]) => `- ${quantity}× ${name} — TSh ${(quantity * 20000).toLocaleString()}`).join("\n");
-        const total = selectedItems().reduce((sum, [, quantity]) => sum + quantity * 20000, 0);
+        const orderLines = selectedItems().map(([name, quantity]) => `- ${quantity}× ${name} — TSh ${(quantity * prices.get(name)).toLocaleString()}`).join("\n");
+        const total = selectedItems().reduce((sum, [name, quantity]) => sum + quantity * prices.get(name), 0);
         const promoCode = promoCodeInput.value.trim();
-        const message = `Hi! I'd like to order:\n${orderLines}\n\nTotal: TSh ${total.toLocaleString()}\n\nDelivery location: ${locationSelect.value}\nCompany: ${companyInput.value.trim()}\nOffice number: ${officeNumberInput.value.trim()}${promoCode ? `\nPromo code: ${promoCode}` : ""}\n\nThank you!`;
+        const message = `Hi! I'd like to order:\n${orderLines}\n\nTotal: TSh ${total.toLocaleString()}\n\nDelivery location: ${locationSelect.value}\nCompany name: ${companyInput.value.trim()}\nOffice number: ${officeNumberInput.value.trim()}${promoCode ? `\nPromo code: ${promoCode}` : ""}\n\nThank you!`;
         window.open(`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`, "_blank", "noopener,noreferrer");
         locationDialog.close();
       });
