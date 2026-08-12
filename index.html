@@ -55,33 +55,12 @@
         flex-direction: column;
         align-items: center;
         margin-bottom: 50px;
-        color: #000;
-        font-family: var(--serif);
       }
 
-      .brand-monogram {
-        display: grid;
-        gap: 4px;
-      }
-
-      .brand-letter {
-        display: grid;
-        width: 80px;
-        height: 80px;
-        place-items: center;
-        color: #fff;
-        background: #000;
-        font-size: 5rem;
-        font-weight: 400;
-        line-height: 0.8;
-      }
-
-      .brand-name {
-        margin-top: 6px;
-        font-size: 2rem;
-        font-weight: 400;
-        letter-spacing: -0.06em;
-        line-height: 1;
+      .brand-logo {
+        display: block;
+        width: 86px;
+        height: auto;
       }
 
       h1, h2 { font-family: var(--serif); }
@@ -126,7 +105,7 @@
 
       .section-heading {
         display: flex;
-        align-items: baseline;
+        align-items: flex-start;
         justify-content: space-between;
         gap: 16px;
         padding-bottom: 15px;
@@ -137,6 +116,26 @@
         margin: 0;
         font-size: clamp(1.45rem, 2.45vw, 1.95rem);
         letter-spacing: -0.035em;
+      }
+
+      .section-title-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .section-logo {
+        display: block;
+        width: 42px;
+        height: 42px;
+        object-fit: contain;
+      }
+
+      .section-subtitle {
+        margin: 5px 0 0;
+        color: var(--muted);
+        font-size: 0.84rem;
+        line-height: 1.35;
       }
 
       .section-number {
@@ -180,15 +179,6 @@
         color: var(--accent);
         font-size: 0.84rem;
         font-weight: 700;
-      }
-
-      .menu-note {
-        margin: -13px 0 0;
-        color: var(--muted);
-        font-family: var(--serif);
-        font-size: 1rem;
-        font-style: italic;
-        text-align: center;
       }
 
       .quantity-control {
@@ -316,8 +306,7 @@
       @media (max-width: 560px) {
         .hero { padding: 26px 22px 48px; }
         .brand { margin-bottom: 35px; }
-        .brand-letter { width: 58px; height: 58px; font-size: 3.6rem; }
-        .brand-name { font-size: 1.55rem; }
+        .brand-logo { width: 66px; }
         .intro { font-size: 0.88rem; }
         main { width: min(100% - 20px, 1130px); }
         .menu-section { margin-bottom: 16px; padding: 20px 18px 8px; border-radius: 17px; }
@@ -333,16 +322,12 @@
   </head>
   <body>
     <header class="hero">
-      <div class="brand" aria-label="Zo Café">
-        <div class="brand-monogram" aria-hidden="true">
-          <span class="brand-letter">Z</span>
-          <span class="brand-letter">O</span>
-        </div>
-        <span class="brand-name">Café</span>
+      <div class="brand">
+        <img class="brand-logo" src="ZO-logo-cropped.png" alt="ZO" />
       </div>
       <h1>Pick your plates,<em>we'll take it from there.</em></h1>
       <p class="intro">
-        Tap the items you want, adjust the quantities, then press Order. Your selected items will open in WhatsApp as a ready-to-send message. Place your order before 10:00 AM for same-day preparation.
+        Tap the items you want, adjust the quantities, then press Order. Your selected items will open in WhatsApp as a ready-to-send message. Place your order before 10:00 AM for same-day preparation (Monday–Friday).
       </p>
     </header>
 
@@ -371,8 +356,8 @@
           </select>
         </div>
         <div class="form-field">
-          <label for="company">Company name</label>
-          <input id="company" name="company" autocomplete="organization" placeholder="e.g. Dentsu" required />
+          <label for="company">Company name (eg Samasung)</label>
+          <input id="company" name="company" autocomplete="organization" placeholder="eg Samasung" required />
         </div>
         <div class="form-field">
           <label for="office-number">Office number</label>
@@ -392,7 +377,9 @@
     <script>
       const menu = [
         {
-          title: "Sushi (Tuna and Co)",
+          title: "Sushi (Tuna & Co)",
+          subtitle: "(10 pcs per portion, all freshly made daily)",
+          logo: "tuna-logo-cropped.png",
           number: "01",
           items: [
             ["Volcano Roll", "baked and spiced, served warm on top", 20000],
@@ -427,7 +414,13 @@
       menuElement.innerHTML = menu.map((section) => `
         <section class="menu-section" aria-labelledby="section-${section.number}">
           <div class="section-heading">
-            <h2 id="section-${section.number}">${section.title}</h2>
+            <div>
+              <div class="section-title-row">
+                <h2 id="section-${section.number}">${section.title}</h2>
+                ${section.logo ? `<img class="section-logo" src="${section.logo}" alt="Tuna & Co logo" />` : ""}
+              </div>
+              ${section.subtitle ? `<p class="section-subtitle">${section.subtitle}</p>` : ""}
+            </div>
             <span class="section-number">${section.number}</span>
           </div>
           ${section.items.map(([name, description, price]) => `
@@ -445,7 +438,7 @@
             </article>
           `).join("")}
         </section>
-      `).join("") + `<p class="menu-note">(10 pcs and all freshly made)</p>`;
+      `).join("");
 
       function selectedItems() {
         return [...quantities.entries()].filter(([, quantity]) => quantity > 0);
